@@ -155,4 +155,174 @@ function tableExists($table){
     $result = $db->query($sql);
     return ($result && $db->affected_rows() === 1 ? true : false);
 	}
+
+  
+  function find_by_groupName($val)
+  {
+    global $db;
+    $sql = "SELECT group_name FROM user_groups WHERE group_name = '{$db->escape($val)}' LIMIT 1 ";
+    $result = $db->query($sql);
+    return($db->num_rows($result) === 0 ? true : false);
+  }
+  
+  function find_by_groupLevel($level)
+  {
+    global $db;
+    $sql = "SELECT group_level FROM user_groups WHERE group_level = '{$db->escape($level)}' LIMIT 1 ";
+    $result = $db->query($sql);
+    return($db->num_rows($result) === 0 ? true : false);
+  }
+  
+   function page_require_level($require_level){
+     global $session;
+     $current_user = current_user();
+     $login_level = find_by_groupLevel($current_user['user_level']);
+     if (!$session->isUserLoggedIn(true)):
+            $session->msg('d','Please login...');
+            redirect('add.php', false);
+            
+     elseif($current_user['user_level'] <= (int)$require_level):
+              return true;
+      else:
+            $session->msg("d", "Sorry! you dont have permission to view the page.");
+            redirect('home.php', false);
+        endif;
+
+     }
+     
+  function join_product_table(){
+     global $db;
+     $sql  =" SELECT p.id,p.name,p.quantity,p.buy_price,p.issue_price,p.media_id,p.date,c.name";
+    $sql  .=" AS categorie,m.file_name AS image";
+    $sql  .=" FROM products p";
+    $sql  .=" LEFT JOIN categories c ON c.id = p.categorie_id";
+    $sql  .=" LEFT JOIN subcategories s ON s.id = p.subcategorie_id";
+    $sql  .=" LEFT JOIN media m ON m.id = p.media_id";
+    $sql  .=" ORDER BY p.id ASC";
+    return find_by_sql($sql);
+
+   }
+  function join_product_table2(){
+     global $db;
+     $sql  =" SELECT p.id,p.name,p.quantity,p.buy_price,p.issue_price,p.media_id,p.date,p.vendor,c.name";
+    $sql  .=" AS categorie,m.file_name AS image";
+    $sql  .=" FROM products p";
+    $sql  .=" LEFT JOIN categories c ON c.id = p.categorie_id";
+    $sql  .=" LEFT JOIN subcategories s ON s.id = p.subcategorie_id";
+    $sql  .=" LEFT JOIN media m ON m.id = p.media_id";
+    $sql  .=" where p.name in (SELECT name FROM products GROUP BY name HAVING  (SUM(quantity) <= 3))";
+    // $sql  .=" group by p.name having sum(p.quantity) <= 3";
+    $sql  .=" ORDER BY p.id ASC";
+    return find_by_sql($sql);
+
+   }
+   
+
+   function find_product_by_title($product_name){
+     global $db;
+     $p_name = remove_junk($db->escape($product_name));
+     $sql = "SELECT name FROM products WHERE name like '%$p_name%' LIMIT 5";
+     $result = find_by_sql($sql);
+     return $result;
+   }
+
+   
+  function find_all_product_info_by_title($title){
+    global $db;
+    $sql  = "SELECT * FROM products ";
+    $sql .= " WHERE name ='{$title}'";
+    return find_by_sql($sql);
+  }
+
+  
+  function update_product_qty($qty,$p_id){
+    global $db;
+    $qty = (int) $qty;
+    $id  = (int)$p_id;
+    $sql = "UPDATE products SET quantity=quantity -'{$qty}' WHERE id = '{$id}'";
+    $result = $db->query($sql);
+    return($db->affected_rows() === 1 ? true : false);
+
+  }
+  
+ function find_recent_product_added($limit){
+   global $db;
+   $sql   = " SELECT p.id,p.name,p.issue_price,p.media_id,c.name AS categorie,";
+   $sql  .= "m.file_name AS image FROM products p";
+   $sql  .= " LEFT JOIN categories c ON c.id = p.categorie_id";
+   $sql  .= " LEFT JOIN media m ON m.id = p.media_id";
+   $sql  .= " ORDER BY p.id DESC LIMIT ".$db->escape((int)$limit);
+   return find_by_sql($sql);
+ }
+ 
+ function find_higest_issueing_product($limit){
+   global $db;
+   $sql  = "SELECT p.name, COUNT(s.product_id) AS totalSold, SUM(s.qty) AS totalQty";
+   $sql .= " FROM issues s";
+   $sql .= " LEFT JOIN products p ON p.id = s.product_id ";
+   $sql .= " GROUP BY s.product_id";
+   $sql .= " ORDER BY SUM(s.qty) DESC LIMIT ".$db->escape((int)$limit);
+   return $db->query($sql);
+ }
+ 
+ function find_all_issue(){
+   global $db;
+   $sql  = "SELECT s.id,s.qty,s.price,s.date,p.name";
+   $sql .= " FROM issues s";
+   $sql .= " LEFT JOIN products p ON s.product_id = p.id";
+   $sql .= " ORDER BY s.date DESC";
+   return find_by_sql($sql);
+ }
+ 
+function find_recent_issue_added($limit){
+  global $db;
+  $sql  = "SELECT s.id,s.qty,s.price,s.date,p.name";
+  $sql .= " FROM issues s";
+  $sql .= " LEFT JOIN products p ON s.product_id = p.id";
+  $sql .= " ORDER BY s.date DESC LIMIT ".$db->escape((int)$limit);
+  return find_by_sql($sql);
+}
+
+function find_issue_by_dates($start_date,$end_date){
+  global $db;
+  $start_date  = date("Y-m-d", strtotime($start_date));
+  $end_date    = date("Y-m-d", strtotime($end_date));
+  $sql  = "SELECT s.date, p.name,p.issue_price,p.buy_price,";
+  $sql .= "COUNT(s.product_id) AS total_records,";
+  $sql .= "SUM(s.qty) AS total_issues,";
+  $sql .= "SUM(p.issue_price * s.qty) AS total_issueing_price,";
+  $sql .= "SUM(p.buy_price * s.qty) AS total_buying_price ";
+  $sql .= "FROM issues s ";
+  $sql .= "LEFT JOIN products p ON s.product_id = p.id";
+  $sql .= " WHERE s.date BETWEEN '{$start_date}' AND '{$end_date}'";
+  $sql .= " GROUP BY DATE(s.date),p.name";
+  $sql .= " ORDER BY DATE(s.date) DESC";
+  return $db->query($sql);
+}
+
+function  dailyissues($year,$month){
+  global $db;
+  $sql  = "SELECT s.qty,";
+  $sql .= " DATE_FORMAT(s.date, '%Y-%m-%e') AS date,p.name,";
+  $sql .= "SUM(p.issue_price * s.qty) AS total_issueing_price";
+  $sql .= " FROM issues s";
+  $sql .= " LEFT JOIN products p ON s.product_id = p.id";
+  $sql .= " WHERE DATE_FORMAT(s.date, '%Y-%m' ) = '{$year}-{$month}'";
+  $sql .= " GROUP BY DATE_FORMAT( s.date,  '%e' ),s.product_id";
+  return find_by_sql($sql);
+}
+
+function  monthlyissues($year){
+  global $db;
+  $sql  = "SELECT s.qty,";
+  $sql .= " DATE_FORMAT(s.date, '%Y-%m-%e') AS date,p.name,";
+  $sql .= "SUM(p.issue_price * s.qty) AS total_issueing_price";
+  $sql .= " FROM issues s";
+  $sql .= " LEFT JOIN products p ON s.product_id = p.id";
+  $sql .= " WHERE DATE_FORMAT(s.date, '%Y' ) = '{$year}'";
+  $sql .= " GROUP BY DATE_FORMAT( s.date,  '%c' ),s.product_id";
+  $sql .= " ORDER BY date_format(s.date, '%c' ) ASC";
+  return find_by_sql($sql);
+}
+
 ?>
