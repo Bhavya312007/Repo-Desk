@@ -1,5 +1,9 @@
      </div>
     </div>
+    <script src="libs/js/jquery.min.js"></script>
+  <script src="libs/js/bootstrap.min.js"></script>
+  <script src="libs/js/bootstrap-datepicker.min.js"></script>
+  <script type="text/javascript" src="libs/js/functions.js"></script>
   </body>
   <script>
     Array.from(document.querySelectorAll("a.btn-danger")).map(

@@ -10,6 +10,16 @@
             echo ucfirst($user['name']);
           else echo "ReportDesk"; ?>
   </title>
+  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" /> -->
+  <link rel="stylesheet" href="libs/css/bootstrap.css" />
+  <link rel="stylesheet" href="libs/css/bootstrap.css.map" />
+  <link rel="stylesheet" href="libs/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="libs/css/bootstrap-theme.css" />
+  <link rel="stylesheet" href="libs/css/bootstrap-theme.css.map" />
+  <!-- <link rel="stylesheet" href="libs/css/bootstrap-theme.min.map" /> -->
+  <link rel="stylesheet" href="libs/css/datepicker3.min.css" />
+  <link rel="stylesheet" href="libs/css/main.css" />
+  <link rel="icon" href="ibs/images/i1.svg" type="image/icon type">
 </head>
 <style>
   /* Styling for the modal overlay */

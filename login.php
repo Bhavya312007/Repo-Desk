@@ -17,6 +17,11 @@ require_once('load.php');
         }
         </style>
 <?php include_once('header.php'); ?>
+<div style='position:fixed;top:120px;left:60px;'>
+  <a href="add.php">
+    <i class="glyphicon glyphicon-circle-arrow-left"style="font-size:25px;"></i>
+  </a>
+</div>
 
 <div class="login-page" style="width: 500px;border:1px solid purple;">
   <!-- <div class="text-center">
