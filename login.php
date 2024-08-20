@@ -16,6 +16,8 @@ require_once('load.php');
             font-style: normal;
         }
         </style>
+<?php include_once('header.php'); ?>
+
 <div class="login-page" style="width: 500px;border:1px solid purple;">
   <!-- <div class="text-center">
     <h1>Login Panel</h1>
@@ -51,4 +53,4 @@ require_once('load.php');
     </div>
   </form>
 </div>
-<?php include_once('layouts/footer.php'); ?>
+<?php include_once('footer.php'); ?>
