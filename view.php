@@ -23,6 +23,10 @@
   // 4.issueDate
   if(isset($_POST['issueDate']) && $_POST['issueDate']!="")
       $conditions[]=" issueDate = '".$_POST['issueDate']."'";
+
+  // 5.examDate
+  if(isset($_POST['examDate']) && $_POST['examDate']!="")
+      $conditions[]=" examDate = '".$_POST['examDate']."-01'";
   
   //putting conditions in queries
   for($i=0;$i<count($conditions);$i++){
