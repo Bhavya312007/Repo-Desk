@@ -1,6 +1,6 @@
 <?php
   $page_title = 'All Products';
-  require_once('load.php');
+  require_once('includes/load.php');
 
 
   $sql="SELECT * FROM report ";//query for geeting the data
