@@ -1,7 +1,12 @@
 <?php
   $page_title = 'All Products';
   require_once('includes/load.php');
+  // Check what level user has permission to view this page
+  page_require_level(3);
 
+  //<------------------------------------------------------------------------------
+  //Search 
+  //<------------------------------------------------------------------------------
 
   $sql="SELECT * FROM report ";//query for geeting the data
   $query="SELECT count(id) FROM report  ";//query for getting
@@ -69,6 +74,7 @@
   $limit=15;
   $offset=0;
   
+  $sql_print=$sql;
   if(isset($_POST['offset'])) $offset=$_POST['offset'];
   $sql = $sql." limit ".$limit." offset ".$offset.";";
   
@@ -83,9 +89,53 @@
   //Search 
   //------------------------------------------------------------------------------>
 
+  if(isset($_POST['print'])){
+    $pFilename='view.xls';
+    if (file_exists($pFilename)) {
+        unlink($pFilename);
+    }
+    require_once("partials/ExcelData.php");
+
+    $data=[];
+
+    //data
+    global $db;
+    $print=$db->query($sql_print.";");
+
+    //extract data in 2d array
+    $values=['examDate','issueDate','enrol','name','sem','sgpa','cgpa','SheetSrNo','passFail','ex','mobile'];
+    $data = data_extract($print,$values);
+    
+    for($i=0;$i<count($data);$i++){ 
+      $data[$i]['#'] = $i+1;//numbering
+      $data[$i]['examDate'] = substr($data[$i]['examDate'],0,-3);// removing -01 from examDate
+      ($data[$i]['passFail']==0) ? $data[$i]['passFail'] = 'Fail' : $data[$i]['passFail'] = 'Pass' ; //pass fail
+      ($data[$i]['ex']==1) ? $data[$i]['ex'] = 'Ex' : $data[$i]['ex'] = 'Regular' ; //ex
+    }
+    
+    $values=['#','examDate','issueDate','enrol','name','sem','sgpa','cgpa','SheetSrNo','passFail','ex','mobile'];
+    $heads=['#','Exam Date','Issue Date','Enrollment No','Name','Sem','SGPA','CGPA','Sheet SR No','Pass/Fail','Student Type','Mobile'];
+    
+    //save print file
+    print_excel2($data,$values,$heads,'view.xlsx');
+
+
+    echo " <span></span>";
+    //print file
+    echo "<script>
+    file=document.createElement('a');
+    file.setAttribute('href','view.xlsx');
+    file.setAttribute('download','view.xlsx');
+    file.classList.add('display-none');
+    document.querySelector('body').append(file);
+    file.click();
+    </script>";
+    // unlink('view.xlsx');
+    echo "<script> file.remove();</script>";
+  }
 
 ?>
-<?php include_once('header.php'); ?>
+<?php include_once('layouts/header.php'); ?>
 <form action='view.php' method='post' style='position:fixed;top:70px;' >
   <div class="col-md-12" style='position:fixed;bottom:10px;left:0px;z-index:98;'>
     <?php echo display_msg($msg); ?>
@@ -147,6 +197,10 @@
           <!-- Search button -->
           <div class='col-md-6' >
               <button type="submit"class="btn btn-primary" >Search</button>
+          </div>
+          <!-- print details -->
+          <div class='col-md-6'>
+              <button name='print' type="submit"class="btn btn-primary" >Print</button>
           </div>
         </div>
       </div>
@@ -300,4 +354,4 @@
     flex-wrap:wrap;
   } */
 </style>
-<?php include_once('footer.php'); ?>
+<?php include_once('layouts/footer.php'); ?>
