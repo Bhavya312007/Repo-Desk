@@ -2,7 +2,7 @@
 # Repo Desk
 
 ## Description
-**Repo Desk** is a comprehensive platform designed to help you manage and interact with your repositories effortlessly. Built with PHP and integrated with PHPExcel, Repo Desk provides an intuitive interface to handle everything from repository data management to user authentication.
+**Repo Desk** is a comprehensive platform designed to help you manage and interact with database containg marksheet distribution record. Built with PHP and integrated with PHPExcel, Repo Desk provides an intuitive interface to handle everything from data management to user authentication.
 
 ## Features
 - **Repository Management**: Easily organize, manage, and access your repositories.
